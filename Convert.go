@@ -178,7 +178,7 @@ Loop:
     return fmt.Errorf("Download failed %v\n", err)
   }
 
-  fmt.Printf("Download saved to %v/%v \n", configDir, resp.Filename)
+  fmt.Printf("Download saved to %v \n", resp.Filename)
 
   return nil
 }

@@ -3,6 +3,7 @@ package main
 import (
   "flag"
   "log"
+  "fmt"
 )
 
 func main() {
@@ -30,4 +31,6 @@ func main() {
   if err != nil {
     log.Fatal(err)
   }
+
+  fmt.Println("Done")
 }
