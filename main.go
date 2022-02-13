@@ -12,10 +12,11 @@ func main() {
   }
 
   morseString := flag.String("m", "", "Morse code string to convert.")
+  appDir := flag.String("appDir", "", "Path to app config dir, if part of larger application")
 
   flag.Parse()
 
-  err = convert.Init(*morseString, 4)
+  err = convert.Init(*morseString, 4, *appDir)
   if err != nil {
     log.Fatal(err)
   }

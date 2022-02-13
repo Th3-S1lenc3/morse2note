@@ -8,6 +8,8 @@ import (
   "math"
   "strconv"
   "os"
+  "github.com/cavaliergopher/grab/v3"
+  "time"
 )
 
 type Convert struct {
@@ -139,7 +141,49 @@ func (c *Convert) checkMorseString() error {
   return nil
 }
 
-func (c *Convert) Init(morseString string, startingOctave int) error {
+func (c *Convert) DownloadNotes(configDir string, fileName string) error {
+  fmt.Printf("Cannot find \"%s\" in \"%s\"\n", fileName, configDir)
+
+  remoteFileURL := "https://raw.githubusercontent.com/Th3-S1lenc3/morse2note/master/json/notes.min.json"
+
+  // Create Client
+  client := grab.NewClient()
+  req, _ := grab.NewRequest(configDir, remoteFileURL)
+
+  // Start Download
+  fmt.Printf("Downloading %v...\n", req.URL())
+	resp := client.Do(req)
+	fmt.Printf("  %v\n", resp.HTTPResponse.Status)
+
+  // Start UI Loop
+	t := time.NewTicker(500 * time.Millisecond)
+	defer t.Stop()
+
+Loop:
+  for {
+    select {
+    case <-t.C:
+      fmt.Printf(
+        "  transferred %v / %v bytes (%.2f%%)\n",
+        resp.BytesComplete(),
+        resp.Size,
+        100 * resp.Progress(),
+      )
+    case <- resp.Done:
+      break Loop
+    }
+  }
+
+  if err := resp.Err(); err != nil {
+    return fmt.Errorf("Download failed %v\n", err)
+  }
+
+  fmt.Printf("Download saved to %v/%v \n", configDir, resp.Filename)
+
+  return nil
+}
+
+func (c *Convert) Init(morseString string, startingOctave int, appDir string) error {
   c.morseString = strings.ReplaceAll(morseString, " ", "")
   c.morseString = strings.Trim(c.morseString, "/")
 
@@ -152,7 +196,36 @@ func (c *Convert) Init(morseString string, startingOctave int) error {
 
   c.notes = CNotes{}
 
-  jsonData, err := ioutil.ReadFile("notes.json")
+  if appDir == "" {
+    appDir, err = os.UserConfigDir()
+    if err != nil {
+      return err
+    }
+  }
+
+  _, err = os.Stat(appDir)
+	if err != nil && os.IsNotExist(err) {
+		return fmt.Errorf("Cannot find directory: \"%s\"", appDir)
+	}
+
+  configDir := fmt.Sprintf("%s/Morse2Note", appDir)
+
+  _, err = os.Stat(configDir)
+  if err != nil && os.IsNotExist(err) {
+    err = os.Mkdir(configDir, os.FileMode(0755))
+    if err != nil {
+      return err
+    }
+	}
+
+  notesJsonFilePath := fmt.Sprintf("%s/notes.min.json", configDir)
+
+  _, err = os.Stat(notesJsonFilePath)
+  if err != nil && os.IsNotExist(err) {
+    c.DownloadNotes(configDir, "notes.min.json")
+  }
+
+  jsonData, err := ioutil.ReadFile(notesJsonFilePath)
   if err != nil {
     return err
   }
