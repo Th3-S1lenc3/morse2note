@@ -20,7 +20,7 @@ func main() {
     log.Fatal(err)
   }
 
-  err = convert.Convert2Note()
+  err = convert.Convert()
   if err != nil {
     log.Fatal(err)
   }

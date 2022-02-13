@@ -21,38 +21,42 @@ func NewConvert() (*Convert, error) {
   return &Convert{}, nil
 }
 
-func (c *Convert) Convert2Note() error {
-  morseWords := strings.Split(c.morseString, "/")
+func (c *Convert) Convert() error {
+  morseWholeWords := strings.Split(c.morseString, "//")
 
-  for i := 0; i < len(morseWords); i++ {
-    morseChars := strings.Split(morseWords[i], "")
+  for i := 0; i < len(morseWholeWords); i++ {
+    morseWords := strings.Split(morseWholeWords[i], "/")
 
-    block := CBlock{}
+    for j := 0; j < len(morseWords); j++ {
+      morseChars := strings.Split(morseWords[j], "")
 
-    for j := 0; j < len(morseChars); j++ {
-      char := morseChars[j]
+      block := CBlock{}
 
-      octave := c.startingOctave
-      noteType := "quarterBeat"
+      for k := 0; k < len(morseChars); k++ {
+        char := morseChars[k]
 
-      startingIndex := -2 - j
+        octave := c.startingOctave
+        noteType := "quarterBeat"
 
-      if char == "-" {
-        octave -= 1
-        startingIndex = int(math.Abs(float64(startingIndex)))
+        startingIndex := -2 - k
+
+        if char == "-" {
+          octave -= 1
+          startingIndex = int(math.Abs(float64(startingIndex)))
+        }
+
+        note, err := c.findNoteInDictionary(startingIndex, octave)
+        if err != nil {
+          return err
+        }
+
+        note.NoteType = noteType
+
+        block.Notes = append(block.Notes, note)
       }
 
-      note, err := c.findNoteInDictionary(startingIndex, octave)
-      if err != nil {
-        return err
-      }
-
-      note.NoteType = noteType
-
-      block.Notes = append(block.Notes, note)
+      c.notes.Blocks = append(c.notes.Blocks, block)
     }
-
-    c.notes.Blocks = append(c.notes.Blocks, block)
   }
 
 
@@ -116,14 +120,18 @@ func (c *Convert) findNoteInDictionary(index int, octave int) (Note, error) {
 }
 
 func (c *Convert) checkMorseString() error {
-  morseWords := strings.Split(c.morseString, "/")
+  morseWholeWords := strings.Split(c.morseString, "//")
 
-  for i := 0; i < len(morseWords); i++ {
-    morseChars := strings.Split(morseWords[i], "")
+  for i := 0; i < len(morseWholeWords); i++ {
+    morseWords := strings.Split(morseWholeWords[i], "/")
 
-    for j := 0; j < len(morseChars); j++ {
-      if morseChars[i] != "." && morseChars[i] != "-" {
-        return fmt.Errorf("Invalid Morse String: %s; %s; %s", c.morseString, morseChars, morseChars[i])
+    for j := 0; j < len(morseWords); j++ {
+      morseChars := strings.Split(morseWords[j], "")
+
+      for k := 0; k < len(morseChars); k++ {
+        if morseChars[i] != "." && morseChars[i] != "-" {
+          return fmt.Errorf("Invalid Morse String: %s; %s; %s", c.morseString, morseChars, morseChars[i])
+        }
       }
     }
   }
@@ -133,6 +141,7 @@ func (c *Convert) checkMorseString() error {
 
 func (c *Convert) Init(morseString string, startingOctave int) error {
   c.morseString = strings.ReplaceAll(morseString, " ", "")
+  c.morseString = strings.Trim(c.morseString, "/")
 
   err := c.checkMorseString()
   if err != nil {
