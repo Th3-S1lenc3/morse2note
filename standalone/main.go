@@ -5,10 +5,12 @@ import (
   "log"
   "fmt"
   "os"
+
+  m2n "github.com/Th3-S1lenc3/morse2note"
 )
 
 func main() {
-  convert, err := NewConvert()
+  convert, err := m2n.NewConvert()
   if err != nil {
     log.Fatal(err)
   }
