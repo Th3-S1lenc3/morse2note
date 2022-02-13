@@ -222,7 +222,10 @@ func (c *Convert) Init(morseString string, startingOctave int, appDir string) er
 
   _, err = os.Stat(notesJsonFilePath)
   if err != nil && os.IsNotExist(err) {
-    c.DownloadNotes(configDir, "notes.min.json")
+    err := c.DownloadNotes(configDir, "notes.min.json")
+    if err != nil {
+      return err
+    }
   }
 
   jsonData, err := ioutil.ReadFile(notesJsonFilePath)
