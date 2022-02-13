@@ -1,4 +1,4 @@
-package main
+package morse2note
 
 type Notes struct {
   Notes []string `json:"notes"`
