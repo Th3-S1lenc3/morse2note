@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-  convert, err := m2n.NewConvert()
+  morse2note, err := m2n.NewMorse2Note()
   if err != nil {
     log.Fatal(err)
   }
@@ -23,12 +23,12 @@ func main() {
 
   flag.Parse()
 
-  err = convert.Init(*morseString, 4, *appDir)
+  err = morse2note.Init(*morseString, 4, *appDir)
   if err != nil {
     log.Fatal(err)
   }
 
-  err = convert.Convert()
+  err = morse2note.Convert()
   if err != nil {
     log.Fatal(err)
   }
@@ -46,7 +46,7 @@ func main() {
     outputPath = fmt.Sprintf("%s/note.json", *outputDir)
   }
 
-  err = convert.WriteNotesToFile(outputPath, *override, *indent)
+  err = morse2note.WriteNotesToFile(outputPath, *override, *indent)
   if err != nil {
     log.Fatal(err)
   }

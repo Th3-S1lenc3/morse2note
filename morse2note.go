@@ -12,19 +12,19 @@ import (
   "time"
 )
 
-type Convert struct {
+type Morse2Note struct {
   morseString string
   startingOctave int
   dictionary Notes
   notes CNotes
 }
 
-func NewConvert() (*Convert, error) {
-  return &Convert{}, nil
+func NewMorse2Note() *Morse2Note {
+  return &Morse2Note{}
 }
 
-func (c *Convert) Convert() error {
-  morseWholeWords := strings.Split(c.morseString, "//")
+func (m *Morse2Note) Convert() error {
+  morseWholeWords := strings.Split(m.morseString, "//")
 
   for i := 0; i < len(morseWholeWords); i++ {
     morseWords := strings.Split(morseWholeWords[i], "/")
@@ -37,7 +37,7 @@ func (c *Convert) Convert() error {
       for k := 0; k < len(morseChars); k++ {
         char := morseChars[k]
 
-        octave := c.startingOctave
+        octave := m.startingOctave
         noteType := "quarterBeat"
 
         startingIndex := -2 - k
@@ -47,7 +47,7 @@ func (c *Convert) Convert() error {
           startingIndex = int(math.Abs(float64(startingIndex)))
         }
 
-        note, err := c.findNoteInDictionary(startingIndex, octave)
+        note, err := m.findNoteInDictionary(startingIndex, octave)
         if err != nil {
           return err
         }
@@ -57,7 +57,7 @@ func (c *Convert) Convert() error {
         block.Notes = append(block.Notes, note)
       }
 
-      c.notes.Blocks = append(c.notes.Blocks, block)
+      m.notes.Blocks = append(m.notes.Blocks, block)
     }
   }
 
@@ -65,28 +65,28 @@ func (c *Convert) Convert() error {
   return nil
 }
 
-func (c *Convert) GetDictionary() (Notes, error) {
-  return c.dictionary, nil
+func (m *Morse2Note) GetDictionary() (Notes, error) {
+  return m.dictionary, nil
 }
 
-func (c *Convert) GetNotes() (CNotes, error) {
-  return c.notes, nil
+func (m *Morse2Note) GetNotes() (CNotes, error) {
+  return m.notes, nil
 }
 
-func (c *Convert) WriteNotesToFile(filePath string, indent bool, override bool) error {
+func (m *Morse2Note) WriteNotesToFile(filePath string, indent bool, override bool) error {
   if filePath == "" {
     filePath = "note.json"
   }
 
   if indent == true {
-    data, err := json.MarshalIndent(c.notes, "", "  ")
+    data, err := json.MarshalIndent(m.notes, "", "  ")
     if err != nil {
       return err
     }
 
     return safeWrite(filePath, data, os.FileMode(0644), override)
   } else {
-    data, err := json.Marshal(c.notes)
+    data, err := json.Marshal(m.notes)
     if err != nil {
       return err
     }
@@ -97,9 +97,9 @@ func (c *Convert) WriteNotesToFile(filePath string, indent bool, override bool) 
   return nil
 }
 
-func (c *Convert) findNoteInDictionary(index int, octave int) (Note, error) {
-  notes := c.dictionary.Notes
-  piano := c.dictionary.Piano
+func (m *Morse2Note) findNoteInDictionary(index int, octave int) (Note, error) {
+  notes := m.dictionary.Notes
+  piano := m.dictionary.Piano
 
   middleCIndex := len(notes) / 2
 
@@ -121,8 +121,8 @@ func (c *Convert) findNoteInDictionary(index int, octave int) (Note, error) {
   return Note{}, fmt.Errorf("Not Found.")
 }
 
-func (c *Convert) checkMorseString() error {
-  morseWholeWords := strings.Split(c.morseString, "//")
+func (m *Morse2Note) checkMorseString() error {
+  morseWholeWords := strings.Split(m.morseString, "//")
 
   for i := 0; i < len(morseWholeWords); i++ {
     morseWords := strings.Split(morseWholeWords[i], "/")
@@ -132,7 +132,7 @@ func (c *Convert) checkMorseString() error {
 
       for k := 0; k < len(morseChars); k++ {
         if morseChars[i] != "." && morseChars[i] != "-" {
-          return fmt.Errorf("Invalid Morse String: %s; %s; %s", c.morseString, morseChars, morseChars[i])
+          return fmt.Errorf("Invalid Morse String: %s; %s; %s", m.morseString, morseChars, morseChars[i])
         }
       }
     }
@@ -141,7 +141,7 @@ func (c *Convert) checkMorseString() error {
   return nil
 }
 
-func (c *Convert) DownloadNotes(configDir string, fileName string) error {
+func (m *Morse2Note) DownloadNotes(configDir string, fileName string) error {
   fmt.Printf("Cannot find \"%s\" in \"%s\"\n", fileName, configDir)
 
   remoteFileURL := "https://raw.githubusercontent.com/Th3-S1lenc3/morse2note/master/json/notes.min.json"
@@ -183,18 +183,18 @@ Loop:
   return nil
 }
 
-func (c *Convert) Init(morseString string, startingOctave int, appDir string) error {
-  c.morseString = strings.ReplaceAll(morseString, " ", "")
-  c.morseString = strings.Trim(c.morseString, "/")
+func (m *Morse2Note) Init(morseString string, startingOctave int, appDir string) error {
+  m.morseString = strings.ReplaceAll(morseString, " ", "")
+  m.morseString = strings.Trim(m.morseString, "/")
 
-  err := c.checkMorseString()
+  err := m.checkMorseString()
   if err != nil {
     return err
   }
 
-  c.startingOctave = startingOctave
+  m.startingOctave = startingOctave
 
-  c.notes = CNotes{}
+  m.notes = CNotes{}
 
   if appDir == "" {
     appDir, err = os.UserConfigDir()
@@ -222,7 +222,7 @@ func (c *Convert) Init(morseString string, startingOctave int, appDir string) er
 
   _, err = os.Stat(notesJsonFilePath)
   if err != nil && os.IsNotExist(err) {
-    err := c.DownloadNotes(configDir, "notes.min.json")
+    err := m.DownloadNotes(configDir, "notes.min.json")
     if err != nil {
       return err
     }
@@ -233,7 +233,7 @@ func (c *Convert) Init(morseString string, startingOctave int, appDir string) er
     return err
   }
 
-  err = json.Unmarshal(jsonData, &c.dictionary)
+  err = json.Unmarshal(jsonData, &m.dictionary)
   if err != nil {
     return err
   }
