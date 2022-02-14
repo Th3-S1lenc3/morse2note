@@ -31,7 +31,7 @@ func (m *Morse2Note) Convert(morseString string, startingOctave int) error {
   if err != nil {
     return err
   }
-  
+
   m.startingOctave = startingOctave
 
   morseWholeWords := strings.Split(m.morseString, "//")
@@ -197,13 +197,15 @@ func (m *Morse2Note) Init(appDir string) error {
   m.notes = CNotes{}
 
   if appDir == "" {
-    appDir, err = os.UserConfigDir()
+    cwd, err := os.UserConfigDir()
     if err != nil {
       return err
     }
+
+    appDir = cwd
   }
 
-  _, err = os.Stat(appDir)
+  _, err := os.Stat(appDir)
 	if err != nil && os.IsNotExist(err) {
 		return fmt.Errorf("Cannot find directory: \"%s\"", appDir)
 	}
