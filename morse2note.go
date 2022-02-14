@@ -29,7 +29,7 @@ func (m *Morse2Note) Encode(morseString string, startingOctave int) (CNotes, err
 
   err := m.checkMorseString()
   if err != nil {
-    return "", err
+    return CNotes{}, err
   }
 
   m.startingOctave = startingOctave
@@ -59,7 +59,7 @@ func (m *Morse2Note) Encode(morseString string, startingOctave int) (CNotes, err
 
         note, err := m.findNoteInDictionary(startingIndex, octave)
         if err != nil {
-          return "", err
+          return CNotes{}, err
         }
 
         note.NoteType = noteType
