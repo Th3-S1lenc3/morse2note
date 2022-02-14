@@ -23,13 +23,13 @@ func NewMorse2Note() *Morse2Note {
   return &Morse2Note{}
 }
 
-func (m *Morse2Note) Convert(morseString string, startingOctave int) error {
+func (m *Morse2Note) Encode(morseString string, startingOctave int) (string, error) {
   m.morseString = strings.ReplaceAll(morseString, " ", "")
   m.morseString = strings.Trim(m.morseString, "/")
 
   err := m.checkMorseString()
   if err != nil {
-    return err
+    return "", err
   }
 
   m.startingOctave = startingOctave
@@ -59,7 +59,7 @@ func (m *Morse2Note) Convert(morseString string, startingOctave int) error {
 
         note, err := m.findNoteInDictionary(startingIndex, octave)
         if err != nil {
-          return err
+          return "", err
         }
 
         note.NoteType = noteType
@@ -72,7 +72,7 @@ func (m *Morse2Note) Convert(morseString string, startingOctave int) error {
   }
 
 
-  return nil
+  return "done", nil
 }
 
 func (m *Morse2Note) GetDictionary() (Notes, error) {
@@ -83,7 +83,7 @@ func (m *Morse2Note) GetNotes() (CNotes, error) {
   return m.notes, nil
 }
 
-func (m *Morse2Note) WriteNotesToFile(filePath string, indent bool, override bool) error {
+func (m *Morse2Note) WriteNotesToFile(filePath string, indent bool, override bool) (string, error) {
   if filePath == "" {
     filePath = "note.json"
   }
@@ -91,20 +91,25 @@ func (m *Morse2Note) WriteNotesToFile(filePath string, indent bool, override boo
   if indent == true {
     data, err := json.MarshalIndent(m.notes, "", "  ")
     if err != nil {
-      return err
+      return "", err
     }
 
     return safeWrite(filePath, data, os.FileMode(0644), override)
   } else {
     data, err := json.Marshal(m.notes)
     if err != nil {
-      return err
+      return "", err
     }
 
-    return safeWrite(filePath, data, os.FileMode(0644), override)
+    err = safeWrite(filePath, data, os.FileMode(0644), override);
+    if err != nil {
+      return "", err
+    }
+
+    return "done", nil 
   }
 
-  return nil
+  return "", nil
 }
 
 func (m *Morse2Note) findNoteInDictionary(index int, octave int) (Note, error) {
