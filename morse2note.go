@@ -23,7 +23,7 @@ func NewMorse2Note() *Morse2Note {
   return &Morse2Note{}
 }
 
-func (m *Morse2Note) Encode(morseString string, startingOctave int) (string, error) {
+func (m *Morse2Note) Encode(morseString string, startingOctave int) (CNotes, error) {
   m.morseString = strings.ReplaceAll(morseString, " ", "")
   m.morseString = strings.Trim(m.morseString, "/")
 
@@ -71,8 +71,7 @@ func (m *Morse2Note) Encode(morseString string, startingOctave int) (string, err
     }
   }
 
-
-  return "done", nil
+  return m.notes, nil
 }
 
 func (m *Morse2Note) GetDictionary() (Notes, error) {
@@ -110,7 +109,7 @@ func (m *Morse2Note) WriteNotesToFile(filePath string, indent bool, override boo
     return "", err
   }
 
-  return "done", nil 
+  return "done", nil
 }
 
 func (m *Morse2Note) findNoteInDictionary(index int, octave int) (Note, error) {
