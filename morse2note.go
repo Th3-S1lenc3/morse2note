@@ -59,6 +59,14 @@ func (m *Morse2Note) Encode(morseString string, startingOctave int) (CNotes, err
           startingIndex = int(math.Abs(float64(startingIndex)))
         }
 
+        if startingIndex < -6 {
+          octave += 1
+        }
+
+        if startingIndex > 7 {
+          octave -= 1
+        }
+
         note, err := m.findNoteInDictionary(startingIndex, octave)
         if err != nil {
           return CNotes{}, err
