@@ -24,6 +24,8 @@ func NewMorse2Note() *Morse2Note {
 }
 
 func (m *Morse2Note) Encode(morseString string, startingOctave int) (CNotes, error) {
+  m.notes = CNotes{}
+
   m.morseString = strings.ReplaceAll(morseString, " ", "")
   m.morseString = strings.Trim(m.morseString, "/")
 
