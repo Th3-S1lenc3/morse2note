@@ -23,7 +23,17 @@ func NewMorse2Note() *Morse2Note {
   return &Morse2Note{}
 }
 
-func (m *Morse2Note) Convert() error {
+func (m *Morse2Note) Convert(morseString string, startingOctave int) error {
+  m.morseString = strings.ReplaceAll(morseString, " ", "")
+  m.morseString = strings.Trim(m.morseString, "/")
+
+  err := m.checkMorseString()
+  if err != nil {
+    return err
+  }
+  
+  m.startingOctave = startingOctave
+
   morseWholeWords := strings.Split(m.morseString, "//")
 
   for i := 0; i < len(morseWholeWords); i++ {
@@ -183,17 +193,7 @@ Loop:
   return nil
 }
 
-func (m *Morse2Note) Init(morseString string, startingOctave int, appDir string) error {
-  m.morseString = strings.ReplaceAll(morseString, " ", "")
-  m.morseString = strings.Trim(m.morseString, "/")
-
-  err := m.checkMorseString()
-  if err != nil {
-    return err
-  }
-
-  m.startingOctave = startingOctave
-
+func (m *Morse2Note) Init(appDir string) error {
   m.notes = CNotes{}
 
   if appDir == "" {

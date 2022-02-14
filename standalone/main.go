@@ -23,12 +23,12 @@ func main() {
 
   flag.Parse()
 
-  err = morse2note.Init(*morseString, 4, *appDir)
+  err = morse2note.Init(*appDir)
   if err != nil {
     log.Fatal(err)
   }
 
-  err = morse2note.Convert()
+  err = morse2note.Convert(*morseString, 4)
   if err != nil {
     log.Fatal(err)
   }
