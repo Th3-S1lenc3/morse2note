@@ -88,28 +88,29 @@ func (m *Morse2Note) WriteNotesToFile(filePath string, indent bool, override boo
     filePath = "note.json"
   }
 
+  var (
+    data []byte
+    err error
+  )
+
   if indent == true {
-    data, err := json.MarshalIndent(m.notes, "", "  ")
+    data, err = json.MarshalIndent(m.notes, "", "  ")
     if err != nil {
       return "", err
     }
-
-    return safeWrite(filePath, data, os.FileMode(0644), override)
   } else {
-    data, err := json.Marshal(m.notes)
+    data, err = json.Marshal(m.notes)
     if err != nil {
       return "", err
     }
-
-    err = safeWrite(filePath, data, os.FileMode(0644), override);
-    if err != nil {
-      return "", err
-    }
-
-    return "done", nil 
   }
 
-  return "", nil
+  err = safeWrite(filePath, data, os.FileMode(0644), override);
+  if err != nil {
+    return "", err
+  }
+
+  return "done", nil 
 }
 
 func (m *Morse2Note) findNoteInDictionary(index int, octave int) (Note, error) {
